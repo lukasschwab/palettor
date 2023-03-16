@@ -131,7 +131,7 @@ func meanColor(colors []colorful.Color) colorful.Color {
 
 // Find the item in the haystack to which the needle is closest.
 func nearest(needle colorful.Color, haystack []colorful.Color) colorful.Color {
-	var minDist int
+	var minDist float64
 	var result colorful.Color
 	for i, candidate := range haystack {
 		dist := distanceSquared(needle, candidate)
@@ -145,12 +145,15 @@ func nearest(needle colorful.Color, haystack []colorful.Color) colorful.Color {
 
 // Calculate the square of the Euclidean distance between two colors, ignoring
 // the alpha channel.
-func distanceSquared(a, b colorful.Color) int {
+func distanceSquared(a, b colorful.Color) float64 {
+
+	// NOTE: is this really a decent HCL distance? H-values cover a much greater
+	// range than C and L values.
 	h1, c1, l1 := a.Hcl()
 	h2, c2, l2 := b.Hcl()
 
-	dh := int(h1) - int(h2)
-	dc := int(c1) - int(c2)
-	dl := int(l1) - int(l2)
+	dh := h1 - h2
+	dc := c1 - c2
+	dl := l1 - l2
 	return dh*dh + dc*dc + dl*dl
 }

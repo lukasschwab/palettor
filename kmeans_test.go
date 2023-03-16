@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/lucasb-eyer/go-colorful"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -43,23 +44,17 @@ func newColor(r, g, b, a int) colorful.Color {
 }
 
 func TestDistanceSquared(t *testing.T) {
-	a := newColor(0, 0, 0, 0)
-	b := newColor(255, 255, 255, 0)
-	expected := (0xFFFF * 0xFFFF) + (0xFFFF * 0xFFFF) + (0xFFFF * 0xFFFF)
-	if distanceSquared(a, b) != expected {
-		t.Errorf("distance should be square of Euclidean distance; %d != %d", distanceSquared(a, b), expected)
-	}
+	a := newColor(0, 0, 0, 255)
+	b := newColor(255, 255, 255, 255)
 
-	a = newColor(0, 0, 0, 0)
+	assert.InDelta(t, 1, distanceSquared(a, b), .0001, "distance should be square of Euclidean distance")
+
+	a = newColor(0, 0, 0, 1)
 	b = newColor(0, 0, 0, 255)
-	if distanceSquared(a, b) != 0 {
-		t.Errorf("alpha channel is ignored for the purpose of distance")
-	}
+	assert.Equal(t, 0.00, distanceSquared(a, b), "alpha channel should be ignored for the purpose of distance")
 
 	c := randomColor()
-	if distanceSquared(c, c) != 0 {
-		t.Errorf("distance from between identical colors should be 0")
-	}
+	assert.Equal(t, 0.00, distanceSquared(c, c), "distance from between identical colors should be 0")
 }
 
 func TestNearest(t *testing.T) {
