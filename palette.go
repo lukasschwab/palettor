@@ -52,8 +52,8 @@ func (p *Palette) Entries() []Entry {
 }
 
 // Colors returns a slice of the colors that comprise a Palette.
-func (p *Palette) Colors() []color.Color {
-	var colors []color.Color
+func (p *Palette) Colors() []colorful.Color {
+	var colors []colorful.Color
 	for color := range p.colorWeights {
 		colors = append(colors, color)
 	}
