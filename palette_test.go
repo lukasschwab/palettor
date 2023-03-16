@@ -1,13 +1,14 @@
 package palettor
 
 import (
-	"image/color"
 	"reflect"
 	"testing"
+
+	"github.com/lucasb-eyer/go-colorful"
 )
 
 func TestPalette(t *testing.T) {
-	colorWeights := map[color.Color]float64{
+	colorWeights := map[colorful.Color]float64{
 		black: 0.75,
 		white: 0.25,
 	}

@@ -15,7 +15,7 @@ import (
 func Extract(k, maxIterations int, img image.Image) (*Palette, error) {
 	imgColors, err := getColors(img)
 	if err != nil {
-		return nil, fmt.Errorf("Error extracting colors from image: %w", err)
+		return nil, fmt.Errorf("error extracting colors from image: %w", err)
 	}
 	return clusterColors(k, maxIterations, imgColors)
 }
@@ -30,7 +30,7 @@ func getColors(img image.Image) ([]colorful.Color, error) {
 			var ok bool
 			if colors[i], ok = colorful.MakeColor(img.At(x, y)); !ok {
 				// FIXME: presumably fails for images with transparency.
-				return nil, fmt.Errorf("pixel at (%v, %v) has a-channel 0")
+				return nil, fmt.Errorf("pixel at (%v, %v) has a-channel 0", x, y)
 			}
 			i++
 		}
