@@ -1,23 +1,24 @@
 package palettor
 
 import (
-	"image/color"
 	"sort"
+
+	"github.com/lucasb-eyer/go-colorful"
 )
 
 // A Palette represents the dominant colors extracted from an image, as a
 // mapping from color to the weight of that color's cluster. The weight can be
 // used as an approximation for that color's relative dominance in an image.
 type Palette struct {
-	colorWeights map[color.Color]float64
+	colorWeights map[colorful.Color]float64
 	converged    bool
 	iterations   int
 }
 
 // Entry is a color and its weight in a Palette
 type Entry struct {
-	Color  color.Color `json:"color"`
-	Weight float64     `json:"weight"`
+	Color  colorful.Color `json:"color"`
+	Weight float64        `json:"weight"`
 }
 
 // Entries returns a slice of Entry structs, sorted by weight
@@ -33,8 +34,8 @@ func (p *Palette) Entries() []Entry {
 }
 
 // Colors returns a slice of the colors that comprise a Palette.
-func (p *Palette) Colors() []color.Color {
-	var colors []color.Color
+func (p *Palette) Colors() []colorful.Color {
+	var colors []colorful.Color
 	for color := range p.colorWeights {
 		colors = append(colors, color)
 	}
@@ -60,7 +61,7 @@ func (p *Palette) Iterations() int {
 
 // Weight returns the weight of a color in a Palette as a float in the range
 // [0, 1], or 0 if a given color is not found.
-func (p *Palette) Weight(c color.Color) float64 {
+func (p *Palette) Weight(c colorful.Color) float64 {
 	return p.colorWeights[c]
 }
 
