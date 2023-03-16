@@ -14,13 +14,13 @@ import (
 
 var (
 	r         = rand.New(rand.NewSource(time.Now().UnixNano()))
-	black     = newColor(0, 0, 0, 0)
-	white     = newColor(255, 255, 255, 0)
-	red       = newColor(255, 0, 0, 0)
-	green     = newColor(0, 255, 0, 0)
-	blue      = newColor(0, 0, 255, 0)
-	darkGray  = newColor(1, 1, 1, 0)
-	mostlyRed = newColor(200, 0, 0, 0)
+	black     = newColor(0, 0, 0, 255)
+	white     = newColor(255, 255, 255, 255)
+	red       = newColor(255, 0, 0, 255)
+	green     = newColor(0, 255, 0, 255)
+	blue      = newColor(0, 0, 255, 255)
+	darkGray  = newColor(1, 1, 1, 255)
+	mostlyRed = newColor(200, 0, 0, 255)
 )
 
 func randomColor() colorful.Color {
@@ -29,12 +29,16 @@ func randomColor() colorful.Color {
 
 func newColor(r, g, b, a int) colorful.Color {
 	// Bodge: keep constants.
-	color, _ := colorful.MakeColor(&color.RGBA{
+	color, ok := colorful.MakeColor(&color.RGBA{
 		R: uint8(r),
 		G: uint8(g),
 		B: uint8(b),
 		A: uint8(a),
 	})
+	if !ok {
+		panic("Color fixtures must have nonzero A-channel")
+	}
+
 	return color
 }
 
