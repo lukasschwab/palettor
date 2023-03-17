@@ -3,6 +3,7 @@ package palettor
 import (
 	"fmt"
 	"image/color"
+	"math"
 
 	"github.com/lucasb-eyer/go-colorful"
 )
@@ -35,4 +36,40 @@ func toHCL(col color.Color) (hcl, error) {
 	}
 	h, c, l := intermediate.Hcl()
 	return hcl{h, c, l}, nil
+}
+
+func mean(colors []hcl) hcl {
+	return hcl{
+		h: meanHue(colors),
+		c: arithmeticMean(colors, func(c hcl) float64 { return c.c }),
+		l: arithmeticMean(colors, func(c hcl) float64 { return c.l }),
+	}
+}
+
+// meanHue implements a circular mean: averaging H-values can lead to visually
+// improper centroids. See https://en.wikipedia.org/wiki/Circular_mean#Example
+func meanHue(colors []hcl) float64 {
+	meanSin := arithmeticMean(colors, func(c hcl) float64 {
+		return math.Sin(radians(c.h))
+	})
+	meanCos := arithmeticMean(colors, func(c hcl) float64 {
+		return math.Cos(radians(c.h))
+	})
+	return degrees(math.Atan(meanSin / meanCos))
+}
+
+func radians(degrees float64) float64 {
+	return degrees * (math.Pi / 180)
+}
+
+func degrees(radians float64) float64 {
+	return radians * (180 / math.Pi)
+}
+
+func arithmeticMean(colors []hcl, accessor func(hcl) float64) float64 {
+	var sum float64
+	for _, c := range colors {
+		sum += accessor(c)
+	}
+	return sum / float64(len(colors))
 }

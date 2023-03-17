@@ -35,3 +35,13 @@ func TestColor(t *testing.T) {
 	assert.Equal(t, inputB, b)
 	assert.Equal(t, inputA, a)
 }
+
+func TestMeanHue(t *testing.T) {
+	// Reproduces example: https://en.wikipedia.org/wiki/Circular_mean#Example
+	result := meanHue([]hcl{
+		{h: 355},
+		{h: 5},
+		{h: 15},
+	})
+	assert.InDelta(t, 5, result, 0.001)
+}
