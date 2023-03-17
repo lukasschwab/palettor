@@ -13,8 +13,8 @@ func TestPalette(t *testing.T) {
 		converged:  converged,
 		iterations: iterations,
 	}
-	palette.add(hclBlack.toColor(), 0.75)
-	palette.add(hclWhite.toColor(), 0.25)
+	palette.add(black, 0.75)
+	palette.add(white, 0.25)
 
 	assert.Equal(t, 2, palette.Count())
 	assert.Equal(t, converged, palette.Converged())

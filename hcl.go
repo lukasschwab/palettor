@@ -1,6 +1,7 @@
 package palettor
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/lucasb-eyer/go-colorful"
@@ -10,15 +11,17 @@ type hcl struct {
 	h, c, l float64
 }
 
-func (c hcl) toColor() color.Color {
+// RGBA implements color.Color.
+func (c hcl) RGBA() (r, g, b, a uint32) {
 	// Bodge: squash floating point error to simplify testing with expected
 	// output palettes.
-	r, g, b := colorful.Hcl(c.h, c.c, c.l).Clamped().RGB255()
-	return colorful.Color{
-		R: float64(r / 255),
-		G: float64(g / 255),
-		B: float64(b / 255),
+	rFloat, gFloat, bFloat := colorful.Hcl(c.h, c.c, c.l).Clamped().RGB255()
+	intermediate := colorful.Color{
+		R: float64(rFloat / 255),
+		G: float64(gFloat / 255),
+		B: float64(bFloat / 255),
 	}
+	return intermediate.RGBA()
 }
 
 // Calculate the square of the Euclidean distance between two colors, ignoring
@@ -30,7 +33,11 @@ func (c hcl) distanceSquared(other hcl) float64 {
 	return dh*dh + dc*dc + dl*dl
 }
 
-func toHCL(color colorful.Color) hcl {
-	h, c, l := color.Hcl()
-	return hcl{h, c, l}
+func toHCL(col color.Color) (hcl, error) {
+	intermediate, ok := colorful.MakeColor(col)
+	if !ok {
+		return hcl{}, fmt.Errorf("color has alpha channel 0: %+v", col)
+	}
+	h, c, l := intermediate.Hcl()
+	return hcl{h, c, l}, nil
 }

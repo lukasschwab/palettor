@@ -42,7 +42,7 @@ func clusterColors(k, maxIterations int, colors []hcl) (*Palette, error) {
 		converged:  converged,
 	}
 	for centroid, cluster := range clusters {
-		palette.add(centroid.toColor(), float64(len(cluster))/float64(colorCount))
+		palette.add(centroid, float64(len(cluster))/float64(colorCount))
 	}
 	return palette, nil
 }
