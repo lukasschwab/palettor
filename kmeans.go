@@ -45,12 +45,6 @@ func clusterColors(k, maxIterations int, outerColors []colorful.Color) (*Palette
 	}
 
 	// Convert back to colorful RGB space for output.
-	//
-	// NOTE: this conversion may really be unnecessary; it could be ideal just
-	// to use it as an intermediary (encapsulated with `hclColor`) to convert
-	// back to somthing implementing `color.Color`.
-	//
-	// Alternatively, `hclColor` could implement `color.Color` directly.
 	clusterWeights := make(map[colorful.Color]float64, k)
 	for centroid, cluster := range clusters {
 		clusterWeights[centroid.toColorfulColor()] = float64(len(cluster)) / float64(colorCount)
@@ -146,27 +140,11 @@ func nearest(needle hclColor, haystack []hclColor) hclColor {
 	var minDist float64
 	var result hclColor
 	for i, candidate := range haystack {
-		dist := distanceSquared(needle, candidate)
+		dist := needle.distanceSquared(candidate)
 		if i == 0 || dist < minDist {
 			minDist = dist
 			result = candidate
 		}
 	}
 	return result
-}
-
-// Calculate the square of the Euclidean distance between two colors, ignoring
-// the alpha channel.
-func distanceSquared(a, b hclColor) float64 {
-	// NOTE: consider using one of the (colorful.Color).DistanceX functions
-	// rather than homebrewing euclidean distance.
-	//
-	// + `DistanceCIEDE2000` is the most accurate, but slow.
-	// + `DistanceCIEDE2000klch` is the same, but allows specifying non-1 weights.
-	// + `DistanceLab` is essentially this code but with an additional square
-	// 	 root; That probably shouldn't matter for k-means.
-	//
-	// I suspect they're *all* slower than the euclidean distance here, but they
-	// may produce better results.
-	return a.distanceSquared(b)
 }

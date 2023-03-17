@@ -14,23 +14,20 @@ import (
 )
 
 var (
-	r         = rand.New(rand.NewSource(time.Now().UnixNano()))
-	black     = newColor(0, 0, 0, 255)
-	white     = newColor(255, 255, 255, 255)
-	red       = newColor(255, 0, 0, 255)
-	green     = newColor(0, 255, 0, 255)
-	blue      = newColor(0, 0, 255, 255)
-	darkGray  = newColor(1, 1, 1, 255)
-	mostlyRed = newColor(200, 0, 0, 255)
+	r = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	// FIXME: Bodge; restandardize this interface.
+	black = newColor(0, 0, 0, 255)
+	white = newColor(255, 255, 255, 255)
+	red   = newColor(255, 0, 0, 255)
+
+	// HCL colors test internal behavior.
 	hclBlack     = toHCL(black)
 	hclWhite     = toHCL(white)
 	hclRed       = toHCL(red)
-	hclGreen     = toHCL(green)
-	hclBlue      = toHCL(blue)
-	hclDarkGrey  = toHCL(darkGray)
-	hclMostlyRed = toHCL(mostlyRed)
+	hclGreen     = toHCL(newColor(0, 255, 0, 255))
+	hclBlue      = toHCL(newColor(0, 0, 255, 255))
+	hclDarkGrey  = toHCL(newColor(1, 1, 1, 255))
+	hclMostlyRed = toHCL(newColor(200, 0, 0, 255))
 )
 
 func randomColor() colorful.Color {
@@ -56,14 +53,14 @@ func TestDistanceSquared(t *testing.T) {
 	a := toHCL(newColor(0, 0, 0, 255))
 	b := toHCL(newColor(255, 255, 255, 255))
 
-	assert.InDelta(t, 1, distanceSquared(a, b), .0001, "distance should be square of Euclidean distance")
+	assert.InDelta(t, 1, a.distanceSquared(b), .0001, "distance should be square of Euclidean distance")
 
 	a = toHCL(newColor(0, 0, 0, 1))
 	b = toHCL(newColor(0, 0, 0, 255))
-	assert.Equal(t, 0.00, distanceSquared(a, b), "alpha channel should be ignored for the purpose of distance")
+	assert.Equal(t, 0.00, a.distanceSquared(b), "alpha channel should be ignored for the purpose of distance")
 
 	c := toHCL(randomColor())
-	assert.Equal(t, 0.00, distanceSquared(c, c), "distance from between identical colors should be 0")
+	assert.Equal(t, 0.00, c.distanceSquared(c), "distance from between identical colors should be 0")
 }
 
 func TestNearest(t *testing.T) {

@@ -19,6 +19,8 @@ func (c hclColor) toColorfulColor() colorful.Color {
 	}
 }
 
+// Calculate the square of the Euclidean distance between two colors, ignoring
+// the alpha channel.
 func (c hclColor) distanceSquared(other hclColor) float64 {
 	dh := c.h - other.h
 	dc := c.c - other.c
