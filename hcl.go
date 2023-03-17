@@ -8,6 +8,11 @@ import (
 	"github.com/lucasb-eyer/go-colorful"
 )
 
+const (
+	chromaDistanceWeight    = 50
+	luminanceDistanceWeight = 50
+)
+
 func toHCL(col color.Color) (hcl, error) {
 	intermediate, ok := colorful.MakeColor(col)
 	if !ok {
@@ -35,8 +40,8 @@ func (c hcl) RGBA() (r, g, b, a uint32) {
 // Note: we may want to weight these to get greater C/L variance.
 func (c hcl) distanceSquared(other hcl) float64 {
 	dh := c.hueDistance(other)
-	dc := c.c - other.c
-	dl := c.l - other.l
+	dc := (c.c - other.c) * chromaDistanceWeight
+	dl := (c.l - other.l) * luminanceDistanceWeight
 	return dh*dh + dc*dc + dl*dl
 }
 
