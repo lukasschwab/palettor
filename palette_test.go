@@ -1,7 +1,6 @@
 package palettor
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/lucasb-eyer/go-colorful"
@@ -30,16 +29,7 @@ func TestPalette(t *testing.T) {
 	assert.Equal(t, 0.00, palette.Weight(red), "wrong weight for unknown color")
 
 	for _, color := range palette.Colors() {
-		found := false
-		for inputColor := range colorWeights {
-			if color == inputColor {
-				found = true
-				break
-			}
-		}
-		if !found {
-			t.Errorf("missing color %v from palette", color)
-		}
+		assert.Contains(t, colorWeights, color)
 	}
 
 	// ensure entries are sorted by weight
@@ -47,7 +37,5 @@ func TestPalette(t *testing.T) {
 		{white, 0.25},
 		{black, 0.75},
 	}
-	if entries := palette.Entries(); !reflect.DeepEqual(entries, expectedEntries) {
-		t.Errorf("expected entries %v, got %v", expectedEntries, entries)
-	}
+	assert.Equal(t, expectedEntries, palette.Entries())
 }
