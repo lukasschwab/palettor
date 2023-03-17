@@ -20,6 +20,18 @@ func TestDistanceSquared(t *testing.T) {
 	assert.Equal(t, 0.00, c.distanceSquared(c), "distance from between identical colors should be 0")
 }
 
+func TestHueDistance(t *testing.T) {
+	c := forceHCL(randomColor())
+	assert.InDelta(t, 0, c.hueDistance(c), 0.001, "zero distance between color and itself")
+
+	// Known distances.
+	assert.InDelta(t, 0, hcl{h: 0}.hueDistance(hcl{h: 360}), 0.001, "0 and 360 coincide in m360 space")
+	assert.InDelta(t, 100, hcl{h: 0}.hueDistance(hcl{h: 100}), 0.001)
+
+	assert.InDelta(t, 10, hcl{h: 5}.hueDistance(hcl{h: 355}), 0.001)
+	assert.InDelta(t, 10, hcl{h: 5}.hueDistance(hcl{h: -5}), 0.001)
+}
+
 func TestColor(t *testing.T) {
 	assert.Implements(t, (*color.Color)(nil), new(hcl))
 

@@ -8,6 +8,15 @@ import (
 	"github.com/lucasb-eyer/go-colorful"
 )
 
+func toHCL(col color.Color) (hcl, error) {
+	intermediate, ok := colorful.MakeColor(col)
+	if !ok {
+		return hcl{}, fmt.Errorf("color has alpha channel 0: %+v", col)
+	}
+	h, c, l := intermediate.Hcl()
+	return hcl{h, c, l}, nil
+}
+
 type hcl struct {
 	h, c, l float64
 }
@@ -22,20 +31,26 @@ func (c hcl) RGBA() (r, g, b, a uint32) {
 
 // Calculate the square of the Euclidean distance between two colors, ignoring
 // the alpha channel.
+//
+// Note: we may want to weight these to get greater C/L variance.
 func (c hcl) distanceSquared(other hcl) float64 {
-	dh := c.h - other.h
+	dh := c.hueDistance(other)
 	dc := c.c - other.c
 	dl := c.l - other.l
 	return dh*dh + dc*dc + dl*dl
 }
 
-func toHCL(col color.Color) (hcl, error) {
-	intermediate, ok := colorful.MakeColor(col)
-	if !ok {
-		return hcl{}, fmt.Errorf("color has alpha channel 0: %+v", col)
-	}
-	h, c, l := intermediate.Hcl()
-	return hcl{h, c, l}, nil
+// hueDistance calculates the angular distance between c.h and other.h. The
+// arithmetic distance can be misleading: 0 and 360 have an arithmetic delta of
+// 360, but they coincide (zero hue distance).
+func (c hcl) hueDistance(other hcl) float64 {
+	delta := math.Mod(other.h-c.h, 360)
+	// Pick the shorter angular distance: 'clockwise' or 'counterclockwise'
+	// around the unit circle.
+	return math.Min(
+		math.Abs(delta),
+		math.Abs(360-delta),
+	)
 }
 
 func mean(colors []hcl) hcl {
@@ -63,7 +78,7 @@ func radians(degrees float64) float64 {
 }
 
 func degrees(radians float64) float64 {
-	return radians * (180 / math.Pi)
+	return math.Mod(radians*(180/math.Pi), 360)
 }
 
 func arithmeticMean(colors []hcl, accessor func(hcl) float64) float64 {
