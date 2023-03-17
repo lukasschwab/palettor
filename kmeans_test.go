@@ -69,29 +69,16 @@ func TestDistanceSquared(t *testing.T) {
 func TestNearest(t *testing.T) {
 	var haystack = []hclColor{hclBlack, hclWhite, hclRed, hclGreen, hclBlue}
 
-	if nearest(hclBlack, haystack) != hclBlack {
-		t.Errorf("nearest color to self should be self")
-	}
-	if nearest(hclDarkGrey, haystack) != hclBlack {
-		t.Errorf("dark gray should be nearest to black")
-	}
-	if nearest(hclMostlyRed, haystack) != hclRed {
-		t.Errorf("mostly-red should be nearest to red")
-	}
+	assert.Equal(t, hclBlack, nearest(hclBlack, haystack), "nearest color to self should be self")
+	assert.Equal(t, hclBlack, nearest(hclDarkGrey, haystack), "dark gray should be nearest to black")
+	assert.Equal(t, hclRed, nearest(hclMostlyRed, haystack), "mostly-red should be nearest to red")
 }
 
 func TestFindCentroid(t *testing.T) {
 	var cluster = []hclColor{hclBlack, hclWhite, hclRed, hclMostlyRed}
 	centroid := findCentroid(cluster)
-	found := false
-	for _, c := range cluster {
-		if c == centroid {
-			found = true
-		}
-	}
-	if !found {
-		t.Errorf("centroid should be a member of the cluster")
-	}
+
+	assert.Contains(t, cluster, centroid, "centroid should be a member of the cluster")
 }
 
 func TestCluster(t *testing.T) {
@@ -99,36 +86,29 @@ func TestCluster(t *testing.T) {
 
 	k := 4
 	_, err := clusterColors(k, 100, colors)
-	if err == nil {
-		t.Errorf("too few colors should result in an error")
-	}
+	assert.Error(t, err, "too few colors should result in an error")
 
 	k = 3
 	palette, err := clusterColors(k, 100, colors)
-	if err != nil {
-		t.Fatalf("unexpected error: %s", err)
-	}
-	if palette.Count() != k {
-		t.Errorf("expected %d clusters, got %d", k, palette.Count())
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, k, palette.Count(), "got unexpected number of clusters")
 
 	k = 2
 	colors = []colorful.Color{black, white}
+	t.Logf("colors: %+v", colors)
+
 	palette, _ = clusterColors(k, 100, colors)
-	if palette.Weight(black) != 0.5 {
-		t.Errorf("expected weight of black cluster to be 0.5")
-	}
-	if palette.Weight(white) != 0.5 {
-		t.Errorf("expected weight of white cluster to be 0.5")
-	}
+
+	t.Logf("Palette: %+v", palette)
+
+	assert.Equal(t, 0.5, palette.Weight(black), "expected weight of black cluster to be 0.5")
+	assert.Equal(t, 0.5, palette.Weight(white), "expected weight of white cluster to be 0.5")
 
 	// If there are not enough unique colors to cluster, it's okay for the size
 	// of the extracted palette to be < k
 	k = 3
 	palette, _ = clusterColors(k, 100, []colorful.Color{black, black, black, black, black, white})
-	if palette.Count() > 2 {
-		t.Errorf("actual palette can be smaller than k")
-	}
+	assert.LessOrEqual(t, palette.Count(), 2, "actual palette can be smaller than k")
 }
 
 func BenchmarkClusterColors200x200(b *testing.B) {

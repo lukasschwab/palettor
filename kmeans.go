@@ -131,14 +131,14 @@ func findCentroid(colors []hclColor) hclColor {
 
 // Find the average color in a list of colors.
 func meanColor(colors []hclColor) hclColor {
-	var h, c, l float64
+	var hSum, cSum, lSum float64
 	for _, color := range colors {
-		h += color.h
-		c += color.c
-		l += color.l
+		hSum += color.h
+		cSum += color.c
+		lSum += color.l
 	}
 	count := float64(len(colors))
-	return hclColor{h / count, c / count, l / count}
+	return hclColor{hSum / count, cSum / count, lSum / count}
 }
 
 // Find the item in the haystack to which the needle is closest.
