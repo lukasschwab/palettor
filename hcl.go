@@ -48,7 +48,7 @@ func (c hcl) distanceSquared(other hcl) float64 {
 	// "Then, we can determine A_CH as A_CH = ΔH + 8/50 = ΔH + 0.16."
 	parameterA_CH := deltaHue + 0.16
 	weightedDeltaLum := parameterA_L * (c.l - other.l)
-	chromaHueTerm := square(c.c) + square(other.c) - (2 * c.c * other.c * degrees(math.Cos(radians(deltaHue))))
+	chromaHueTerm := square(c.c) + square(other.c) - (2 * c.c * other.c * math.Cos(radians(deltaHue)))
 	return square(weightedDeltaLum) + (parameterA_CH * chromaHueTerm)
 }
 
