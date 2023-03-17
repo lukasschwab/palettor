@@ -9,15 +9,27 @@ import (
 	"github.com/lucasb-eyer/go-colorful"
 )
 
+type rgbaKey [4]uint32
+
+func asKey(c color.Color) rgbaKey {
+	r, g, b, a := c.RGBA()
+	return rgbaKey{r, g, b, a}
+}
+
 // A Palette represents the dominant colors extracted from an image, as a
 // mapping from color to the weight of that color's cluster. The weight can be
 // used as an approximation for that color's relative dominance in an image.
 type Palette struct {
-	// FIXME: really shouldn't use an interface as a map key, but we should be
-	// able to use an RGBA tuple.
-	colorWeights map[color.Color]float64
-	converged    bool
-	iterations   int
+	entries    map[rgbaKey]Entry
+	converged  bool
+	iterations int
+}
+
+func (p *Palette) add(c color.Color, weight float64) {
+	if p.entries == nil {
+		p.entries = make(map[rgbaKey]Entry)
+	}
+	p.entries[asKey(c)] = Entry{Color: c, Weight: weight}
 }
 
 // Entry is a color and its weight in a Palette
@@ -51,8 +63,8 @@ func (e Entry) MarshalJSON() ([]byte, error) {
 func (p *Palette) Entries() []Entry {
 	entries := make([]Entry, p.Count())
 	i := 0
-	for c, weight := range p.colorWeights {
-		entries[i] = Entry{c, weight}
+	for _, entry := range p.entries {
+		entries[i] = entry
 		i++
 	}
 	sort.Sort(byWeight(entries))
@@ -62,8 +74,8 @@ func (p *Palette) Entries() []Entry {
 // Colors returns a slice of the colors that comprise a Palette.
 func (p *Palette) Colors() []color.Color {
 	var colors []color.Color
-	for color := range p.colorWeights {
-		colors = append(colors, color)
+	for _, entry := range p.entries {
+		colors = append(colors, entry.Color)
 	}
 	return colors
 }
@@ -76,7 +88,7 @@ func (p *Palette) Converged() bool {
 
 // Count returns the number of colors in a Palette.
 func (p *Palette) Count() int {
-	return len(p.colorWeights)
+	return len(p.entries)
 }
 
 // Iterations returns the number of iterations required to extract the colors
@@ -88,7 +100,11 @@ func (p *Palette) Iterations() int {
 // Weight returns the weight of a color in a Palette as a float in the range
 // [0, 1], or 0 if a given color is not found.
 func (p *Palette) Weight(c color.Color) float64 {
-	return p.colorWeights[c]
+	entry, ok := p.entries[asKey(c)]
+	if !ok {
+		return 0
+	}
+	return entry.Weight
 }
 
 // implement sort.Interface

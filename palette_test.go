@@ -1,27 +1,22 @@
 package palettor
 
 import (
-	"image/color"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPalette(t *testing.T) {
-	colorWeights := map[color.Color]float64{
-		black: 0.75,
-		white: 0.25,
-	}
-
 	iterations := 1
 	converged := true
 	palette := &Palette{
-		colorWeights: colorWeights,
-		converged:    converged,
-		iterations:   iterations,
+		converged:  converged,
+		iterations: iterations,
 	}
+	palette.add(hclBlack.toColor(), 0.75)
+	palette.add(hclWhite.toColor(), 0.25)
 
-	assert.Equal(t, len(colorWeights), palette.Count())
+	assert.Equal(t, 2, palette.Count())
 	assert.Equal(t, converged, palette.Converged())
 	assert.Equal(t, iterations, palette.Iterations())
 
@@ -29,7 +24,7 @@ func TestPalette(t *testing.T) {
 	assert.Equal(t, 0.00, palette.Weight(red), "wrong weight for unknown color")
 
 	for _, color := range palette.Colors() {
-		assert.Contains(t, colorWeights, color)
+		assert.Contains(t, palette.entries, asKey(color))
 	}
 
 	// ensure entries are sorted by weight

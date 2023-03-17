@@ -2,7 +2,6 @@ package palettor
 
 import (
 	"fmt"
-	"image/color"
 	"math/rand"
 	"time"
 )
@@ -37,16 +36,15 @@ func clusterColors(k, maxIterations int, colors []hcl) (*Palette, error) {
 		}
 	}
 
-	// Convert back to colorful RGB space for output.
-	clusterWeights := make(map[color.Color]float64, k)
-	for centroid, cluster := range clusters {
-		clusterWeights[centroid.toColor()] = float64(len(cluster)) / float64(colorCount)
+	// Build palette.
+	palette := &Palette{
+		iterations: iterations,
+		converged:  converged,
 	}
-	return &Palette{
-		colorWeights: clusterWeights,
-		iterations:   iterations,
-		converged:    converged,
-	}, nil
+	for centroid, cluster := range clusters {
+		palette.add(centroid.toColor(), float64(len(cluster))/float64(colorCount))
+	}
+	return palette, nil
 }
 
 // Generate the initial list of k centroids from the given list of colors.
