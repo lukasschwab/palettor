@@ -23,7 +23,7 @@ var (
 	// HCL colors test internal behavior.
 	hclBlack     = toHCL(black)
 	hclWhite     = toHCL(white)
-	hclRed       = toHCL(red)
+	hclRed       = toHCL(newColor(255, 0, 0, 255))
 	hclGreen     = toHCL(newColor(0, 255, 0, 255))
 	hclBlue      = toHCL(newColor(0, 0, 255, 255))
 	hclDarkGrey  = toHCL(newColor(1, 1, 1, 255))
@@ -49,22 +49,8 @@ func newColor(r, g, b, a int) colorful.Color {
 	return color
 }
 
-func TestDistanceSquared(t *testing.T) {
-	a := toHCL(newColor(0, 0, 0, 255))
-	b := toHCL(newColor(255, 255, 255, 255))
-
-	assert.InDelta(t, 1, a.distanceSquared(b), .0001, "distance should be square of Euclidean distance")
-
-	a = toHCL(newColor(0, 0, 0, 1))
-	b = toHCL(newColor(0, 0, 0, 255))
-	assert.Equal(t, 0.00, a.distanceSquared(b), "alpha channel should be ignored for the purpose of distance")
-
-	c := toHCL(randomColor())
-	assert.Equal(t, 0.00, c.distanceSquared(c), "distance from between identical colors should be 0")
-}
-
 func TestNearest(t *testing.T) {
-	var haystack = []hclColor{hclBlack, hclWhite, hclRed, hclGreen, hclBlue}
+	var haystack = []hcl{hclBlack, hclWhite, hclRed, hclGreen, hclBlue}
 
 	assert.Equal(t, hclBlack, nearest(hclBlack, haystack), "nearest color to self should be self")
 	assert.Equal(t, hclBlack, nearest(hclDarkGrey, haystack), "dark gray should be nearest to black")
@@ -72,14 +58,14 @@ func TestNearest(t *testing.T) {
 }
 
 func TestFindCentroid(t *testing.T) {
-	var cluster = []hclColor{hclBlack, hclWhite, hclRed, hclMostlyRed}
+	var cluster = []hcl{hclBlack, hclWhite, hclRed, hclMostlyRed}
 	centroid := findCentroid(cluster)
 
 	assert.Contains(t, cluster, centroid, "centroid should be a member of the cluster")
 }
 
 func TestCluster(t *testing.T) {
-	var colors = []colorful.Color{black, white, red}
+	var colors = []hcl{hclBlack, hclWhite, hclRed}
 
 	k := 4
 	_, err := clusterColors(k, 100, colors)
@@ -91,20 +77,15 @@ func TestCluster(t *testing.T) {
 	assert.Equal(t, k, palette.Count(), "got unexpected number of clusters")
 
 	k = 2
-	colors = []colorful.Color{black, white}
-	t.Logf("colors: %+v", colors)
-
+	colors = []hcl{hclBlack, hclWhite}
 	palette, _ = clusterColors(k, 100, colors)
-
-	t.Logf("Palette: %+v", palette)
-
 	assert.Equal(t, 0.5, palette.Weight(black), "expected weight of black cluster to be 0.5")
 	assert.Equal(t, 0.5, palette.Weight(white), "expected weight of white cluster to be 0.5")
 
 	// If there are not enough unique colors to cluster, it's okay for the size
 	// of the extracted palette to be < k
 	k = 3
-	palette, _ = clusterColors(k, 100, []colorful.Color{black, black, black, black, black, white})
+	palette, _ = clusterColors(k, 100, []hcl{hclBlack, hclBlack, hclBlack, hclBlack, hclBlack, hclWhite})
 	assert.LessOrEqual(t, palette.Count(), 2, "actual palette can be smaller than k")
 }
 
