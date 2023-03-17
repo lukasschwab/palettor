@@ -22,6 +22,15 @@ var (
 	blue      = newColor(0, 0, 255, 255)
 	darkGray  = newColor(1, 1, 1, 255)
 	mostlyRed = newColor(200, 0, 0, 255)
+
+	// FIXME: Bodge; restandardize this interface.
+	hclBlack     = toHCL(black)
+	hclWhite     = toHCL(white)
+	hclRed       = toHCL(red)
+	hclGreen     = toHCL(green)
+	hclBlue      = toHCL(blue)
+	hclDarkGrey  = toHCL(darkGray)
+	hclMostlyRed = toHCL(mostlyRed)
 )
 
 func randomColor() colorful.Color {
@@ -44,35 +53,35 @@ func newColor(r, g, b, a int) colorful.Color {
 }
 
 func TestDistanceSquared(t *testing.T) {
-	a := newColor(0, 0, 0, 255)
-	b := newColor(255, 255, 255, 255)
+	a := toHCL(newColor(0, 0, 0, 255))
+	b := toHCL(newColor(255, 255, 255, 255))
 
 	assert.InDelta(t, 1, distanceSquared(a, b), .0001, "distance should be square of Euclidean distance")
 
-	a = newColor(0, 0, 0, 1)
-	b = newColor(0, 0, 0, 255)
+	a = toHCL(newColor(0, 0, 0, 1))
+	b = toHCL(newColor(0, 0, 0, 255))
 	assert.Equal(t, 0.00, distanceSquared(a, b), "alpha channel should be ignored for the purpose of distance")
 
-	c := randomColor()
+	c := toHCL(randomColor())
 	assert.Equal(t, 0.00, distanceSquared(c, c), "distance from between identical colors should be 0")
 }
 
 func TestNearest(t *testing.T) {
-	var haystack = []colorful.Color{black, white, red, green, blue}
+	var haystack = []hclColor{hclBlack, hclWhite, hclRed, hclGreen, hclBlue}
 
-	if nearest(black, haystack) != black {
+	if nearest(hclBlack, haystack) != hclBlack {
 		t.Errorf("nearest color to self should be self")
 	}
-	if nearest(darkGray, haystack) != black {
+	if nearest(hclDarkGrey, haystack) != hclBlack {
 		t.Errorf("dark gray should be nearest to black")
 	}
-	if nearest(mostlyRed, haystack) != red {
+	if nearest(hclMostlyRed, haystack) != hclRed {
 		t.Errorf("mostly-red should be nearest to red")
 	}
 }
 
 func TestFindCentroid(t *testing.T) {
-	var cluster = []colorful.Color{black, white, red, mostlyRed}
+	var cluster = []hclColor{hclBlack, hclWhite, hclRed, hclMostlyRed}
 	centroid := findCentroid(cluster)
 	found := false
 	for _, c := range cluster {
