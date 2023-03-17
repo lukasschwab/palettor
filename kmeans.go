@@ -146,9 +146,17 @@ func nearest(needle colorful.Color, haystack []colorful.Color) colorful.Color {
 // Calculate the square of the Euclidean distance between two colors, ignoring
 // the alpha channel.
 func distanceSquared(a, b colorful.Color) float64 {
+	// NOTE: consider using one of the (colorful.Color).DistanceX functions
+	// rather than homebrewing euclidean distance.
+	//
+	// + `DistanceCIEDE2000` is the most accurate, but slow.
+	// + `DistanceCIEDE2000klch` is the same, but allows specifying non-1 weights.
+	// + `DistanceLab` is essentially this code but with an additional square
+	// 	 root; That probably shouldn't matter for k-means.
+	//
+	// I suspect they're *all* slower than the euclidean distance here, but they
+	// may produce better results.
 
-	// NOTE: is this really a decent HCL distance? H-values cover a much greater
-	// range than C and L values.
 	h1, c1, l1 := a.Hcl()
 	h2, c2, l2 := b.Hcl()
 
