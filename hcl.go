@@ -29,15 +29,31 @@ func (c hcl) RGBA() (r, g, b, a uint32) {
 	return color.RGBA{rFloat, gFloat, bFloat, 255}.RGBA()
 }
 
-// Calculate the square of the Euclidean distance between two colors, ignoring
-// the alpha channel.
+const (
+	// parameterA_L is a constant defined in Sarifuddin & Missaoui 2005: "Due to
+	// this luminance effect, we proceed to a triangulation computation which
+	// leads to a correction factor equal to A_L = 1.4456."
+	parameterA_L float64 = 1.4456
+)
+
+// distanceSquared implements "A New Color Similarity Measure" from Sarifuddin &
+// Missaoui (2005): https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.125.3833
 //
-// Note: we may want to weight these to get greater C/L variance.
+// NOTE: i'm not sure the luminance and chroma intervals in hcl (determined by
+// colorful) correspond to the intervals in the paper. Indeed, it seems like the
+// paper uses intervals with a range greater than 1.
 func (c hcl) distanceSquared(other hcl) float64 {
-	dh := c.hueDistance(other)
-	dc := c.c - other.c
-	dl := c.l - other.l
-	return dh*dh + dc*dc + dl*dl
+	deltaHue := c.hueDistance(other)
+	// From Sarifuddin & Missaoui 2005:
+	// "Then, we can determine A_CH as A_CH = ΔH + 8/50 = ΔH + 0.16."
+	parameterA_CH := deltaHue + 0.16
+	weightedDeltaLum := parameterA_L * (c.l - other.l)
+	chromaHueTerm := square(c.c) + square(other.c) - (2 * c.c * other.c * degrees(math.Cos(radians(deltaHue))))
+	return square(weightedDeltaLum) + (parameterA_CH * chromaHueTerm)
+}
+
+func square(x float64) float64 {
+	return x * x
 }
 
 // hueDistance calculates the angular distance between c.h and other.h. The
