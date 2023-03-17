@@ -16,12 +16,7 @@ func (c hcl) RGBA() (r, g, b, a uint32) {
 	// Bodge: squash floating point error to simplify testing with expected
 	// output palettes.
 	rFloat, gFloat, bFloat := colorful.Hcl(c.h, c.c, c.l).Clamped().RGB255()
-	intermediate := colorful.Color{
-		R: float64(rFloat / 255),
-		G: float64(gFloat / 255),
-		B: float64(bFloat / 255),
-	}
-	return intermediate.RGBA()
+	return color.RGBA{rFloat, gFloat, bFloat, 255}.RGBA()
 }
 
 // Calculate the square of the Euclidean distance between two colors, ignoring

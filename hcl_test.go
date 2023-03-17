@@ -19,3 +19,19 @@ func TestDistanceSquared(t *testing.T) {
 	c := forceHCL(randomColor())
 	assert.Equal(t, 0.00, c.distanceSquared(c), "distance from between identical colors should be 0")
 }
+
+func TestColor(t *testing.T) {
+	assert.Implements(t, (*color.Color)(nil), new(hcl))
+
+	input := color.RGBA{123, 123, 123, 255}
+	inputR, inputG, inputB, inputA := input.RGBA()
+
+	c, err := toHCL(input)
+	assert.NoError(t, err)
+
+	r, g, b, a := c.RGBA()
+	assert.Equal(t, inputR, r)
+	assert.Equal(t, inputG, g)
+	assert.Equal(t, inputB, b)
+	assert.Equal(t, inputA, a)
+}
