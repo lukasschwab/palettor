@@ -13,7 +13,9 @@ import (
 	"log"
 	"math"
 	"os"
+	"strings"
 
+	"github.com/lucasb-eyer/go-colorful"
 	"github.com/mccutchen/palettor"
 	"github.com/nfnt/resize"
 	"github.com/pkg/profile"
@@ -66,6 +68,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error extracting color palette: %s", err)
 	}
+
+	hexes := make([]string, len(palette.Entries()))
+	for i, entry := range palette.Entries() {
+		c, _ := colorful.MakeColor(entry.Color)
+		hexes[i] = fmt.Sprintf("+ `%v`", c.Hex())
+	}
+	println(strings.Join(hexes, "\n"))
 
 	if *jsonOutput {
 		if err := json.NewEncoder(os.Stdout).Encode(palette.Entries()); err != nil {
